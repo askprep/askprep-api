@@ -10,13 +10,16 @@ const session = require("express-session");
 const mongoStore = require("connect-mongo")(session);
 const flash = require("connect-flash");
 const passportConfig = require("./passport");
-//const devConfig = require("./dev");
+var cors = require("cors");
 const routeConfig = require("../routes/routes");
 
 /**
  * express configuration
  */
 const expressConfig = (app, serverConfigs) => {
+  //allow cors
+  app.use(cors());
+
   // apply gzip compression (should be placed before express.static)
   app.use(compress());
 

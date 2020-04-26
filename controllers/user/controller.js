@@ -1,5 +1,10 @@
 const _ = require("lodash");
 const asyncEach = require("async/each");
+const axios = require("axios");
+const GITHUB_CLIENT_ID = require("../../configs/config/credentials")
+  .GITHUB_CLIENT_ID;
+const GITHUB_CLIENT_SECRET = require("../../configs/config/credentials")
+  .GITHUB_CLIENT_SECRET;
 
 // controllers
 const getAllOpinions = require("../opinion/controller").getAllOpinions;
@@ -175,8 +180,30 @@ const getFullProfile = username => {
   });
 };
 
+const getGithubToken = code => {
+  return new Promise((resolve, reject) => {
+    axios
+      .post("https://github.com/login/oauth/access_token", {
+        client_id: GITHUB_CLIENT_ID,
+        client_secret: GITHUB_CLIENT_SECRET,
+        code: code,
+        redirect_uri: "http://localhost:3000/"
+      })
+      .then(response => {
+        resolve({
+          token: response.data,
+          statusText: response.statusText
+        });
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
+};
+
 module.exports = {
   signInViaGithub,
   getUser,
-  getFullProfile
+  getFullProfile,
+  getGithubToken
 };
