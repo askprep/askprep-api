@@ -8,7 +8,13 @@ const passport = require("passport");
 const serverConfigs = require("./configs/config/config");
 
 // connect to database
-mongoose.connect(serverConfigs.DBURL);
+mongoose
+  .connect(serverConfigs.DBURL, {
+    useUnifiedTopology: true,
+    useNewUrlParser: true
+  })
+  .then(() => console.log("Connected to Database"))
+  .catch(error => console.log(error));
 
 // initialize express
 const app = express();

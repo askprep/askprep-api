@@ -14,9 +14,17 @@ const GITHUB_CLIENT_SECRET = require("../../configs/config/credentials")
  */
 const userAPI = app => {
   // get authenticated user
-  app.get("/api/user/getUser", (req, res) => {
-    if (req.user) res.send(req.user);
-    else res.send(null);
+  app.get("/api/user", (req, res) => {
+    axios
+      .get("https://api.github.com/user", {
+        headers: { Authorization: `${req.headers.authorization}` }
+      })
+      .then(response => {
+        res.json(response.data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
   });
 
   // github authentication route
@@ -32,14 +40,11 @@ const userAPI = app => {
         redirect_uri: "http://localhost:3000/"
       })
       .then(response => {
-        res.status(200).send(response);
+        res.json({ access_token: response.data.split("&")[0].split("=")[1] });
       })
       .catch(error => {
         console.log(error);
       });
-    // getGithubToken(req.body.code)
-    //   .then(response => res.status(200).send(response))
-    //   .error(error => console.log(error));
   });
 
   // callback route from github
