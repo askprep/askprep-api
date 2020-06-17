@@ -8,23 +8,35 @@ const GITHUB_CLIENT_ID = require("../../configs/config/credentials")
   .GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = require("../../configs/config/credentials")
   .GITHUB_CLIENT_SECRET;
+import { generateJWTToken, verifyToken } from "../../utilities/authUtils";
 
 /**
  * user apis
  */
 const userAPI = app => {
   // get authenticated user
-  app.get("/api/user", (req, res) => {
-    axios
-      .get("https://api.github.com/user", {
-        headers: { Authorization: `${req.headers.authorization}` }
-      })
-      .then(response => {
-        res.json(response.data);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+  app.get("/api/user", async (req, res) => {
+    try {
+      let verifYToken = await verifyToken(
+        req.headers.authorization.split(" ")[1]
+      );
+      if (verifYToken.isExpired) {
+        axios
+          .get("https://api.github.com/user", {
+            headers: { Authorization: `token ${verifYToken.access_token}` }
+          })
+          .then(response => {
+            res.json(response.data);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      } else {
+        res.stats(401).send("Unauthorize");
+      }
+    } catch (error) {
+      res.json(error);
+    }
   });
 
   // github authentication route
@@ -39,8 +51,11 @@ const userAPI = app => {
         code: req.body.code,
         redirect_uri: "http://localhost:3000/"
       })
-      .then(response => {
-        res.json({ access_token: response.data.split("&")[0].split("=")[1] });
+      .then(async response => {
+        let acces_token = response.data.split("&")[0].split("=")[1];
+        let jwt_token = await generateJWTToken({ acces_token: acces_token });
+        console.log("###################", jwt_token);
+        res.json({ jwt_token });
       })
       .catch(error => {
         console.log(error);

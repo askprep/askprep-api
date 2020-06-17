@@ -9,7 +9,7 @@ const forumAPI = require("../controllers/forum/api");
 const discussionAPI = require("../controllers/discussion/api");
 const opinionAPI = require("../controllers/opinion/api");
 const adminAPI = require("../controllers/admin/api");
-
+import { university_stream_subject_API } from "../controllers/university/api";
 /**
  * routes configurations
  */
@@ -37,6 +37,9 @@ const routesConfig = app => {
 
   // apply admin apis
   adminAPI(app);
+
+  // apply university_stream_subject apis
+  university_stream_subject_API(app);
 
   // all get request will send index.html for react-router
   // to handle the route request
