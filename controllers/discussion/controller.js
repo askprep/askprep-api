@@ -1,7 +1,5 @@
-const generateDiscussionSlug = require("../../utilities/tools")
-  .generateDiscussionSlug;
+import { generateDiscussionSlug } from "../../utilities/tools";
 const getAllOpinions = require("../opinion/controller").getAllOpinions;
-const getUser = require("../user/controller").getUser;
 
 const Discussion = require("../../models/discussion");
 const Opinion = require("../../models/opinion");
@@ -12,37 +10,17 @@ const Opinion = require("../../models/opinion");
  * @param  {String} discussion_id
  * @return {Promise}
  */
-const getDiscussion = (discussion_slug, discussion_id) => {
+export const getDiscussions = () => {
   return new Promise((resolve, reject) => {
-    let findObject = {};
-    if (discussion_slug) findObject.discussion_slug = discussion_slug;
-    if (discussion_id) findObject._id = discussion_id;
-
-    Discussion.findOne(findObject)
-      .populate("forum")
-      .populate("user")
-      .lean()
-      .exec((error, result) => {
-        if (error) {
-          console.log(error);
-          reject(error);
-        } else if (!result) reject(null);
-        else {
-          // add opinions to the discussion object
-          getAllOpinions(result._id).then(
-            opinions => {
-              result.opinions = opinions;
-              resolve(result);
-            },
-            error => {
-              {
-                console.log(error);
-                reject(error);
-              }
-            }
-          );
-        }
-      });
+    Discussion.find({}, (error, result) => {
+      if (error) {
+        console.log(error);
+        reject(error);
+      } else if (!result) reject(null);
+      else {
+        resolve(result);
+      }
+    });
   });
 };
 
@@ -51,18 +29,20 @@ const getDiscussion = (discussion_slug, discussion_id) => {
  * @param  {Object} discussion
  * @return {Promise}
  */
-const createDiscussion = discussion => {
+export const createDiscussion = discussion => {
   return new Promise((resolve, reject) => {
     const newDiscussion = new Discussion({
-      forum_id: discussion.forumId,
-      forum: discussion.forumId,
-      user_id: discussion.userId,
-      user: discussion.userId,
+      forum_id: discussion.forum_id,
+      user_id: discussion.user_id,
       discussion_slug: generateDiscussionSlug(discussion.title),
       date: new Date(),
+      snippet: discussion.snippet,
+      subject: discussion.subject,
       title: discussion.title,
       content: discussion.content,
-      favorites: [],
+      stream: discussion.stream,
+      college: discussion.college,
+      favorites: [discussion.userId],
       tags: discussion.tags,
       pinned: discussion.pinned
     });
@@ -84,7 +64,7 @@ const createDiscussion = discussion => {
  * @param  {ObjectId} user_id
  * @return {Promise}
  */
-const toggleFavorite = (discussion_id, user_id) => {
+export const toggleFavorite = (discussion_id, user_id) => {
   return new Promise((resolve, reject) => {
     Discussion.findById(discussion_id, (error, discussion) => {
       if (error) {
@@ -124,11 +104,11 @@ const toggleFavorite = (discussion_id, user_id) => {
   });
 };
 
-const updateDiscussion = (forum_id, discussion_slug) => {
+export const updateDiscussion = (forum_id, discussion_slug) => {
   // TODO: implement update feature
 };
 
-const deleteDiscussion = discussion_slug => {
+export const deleteDiscussion = discussion_slug => {
   return new Promise((resolve, reject) => {
     // find the discussion id first
     Discussion.findOne({ discussion_slug }).exec((error, discussion) => {
@@ -161,12 +141,4 @@ const deleteDiscussion = discussion_slug => {
       });
     });
   });
-};
-
-module.exports = {
-  getDiscussion,
-  createDiscussion,
-  updateDiscussion,
-  deleteDiscussion,
-  toggleFavorite
 };

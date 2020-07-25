@@ -1,5 +1,5 @@
 // discussion controllers
-const getDiscussion = require("./controller").getDiscussion;
+const getDiscussions = require("./controller").getDiscussions;
 const createDiscussion = require("./controller").createDiscussion;
 const toggleFavorite = require("./controller").toggleFavorite;
 const deleteDiscussion = require("./controller").deleteDiscussion;
@@ -9,9 +9,9 @@ const deleteDiscussion = require("./controller").deleteDiscussion;
  */
 const discussionAPI = app => {
   // get signle discussion
-  app.get("/api/discussion/:discussion_slug", (req, res) => {
-    const { discussion_slug } = req.params;
-    getDiscussion(discussion_slug).then(
+  app.get("/api/discussions", (req, res) => {
+    //const { discussion_slug } = req.params;
+    getDiscussions().then(
       result => {
         res.send(result);
       },
@@ -48,7 +48,7 @@ const discussionAPI = app => {
 
   // create a new discussion
   app.post("/api/discussion/newDiscussion", (req, res) => {
-    if (req.user) {
+    if (req.body.user_id) {
       createDiscussion(req.body).then(
         result => {
           res.send(Object.assign({}, result._doc, { postCreated: true }));

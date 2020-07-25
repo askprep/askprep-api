@@ -19,7 +19,7 @@ const Opinion = require("../../models/opinion");
  * @param  {ObjectId} user_id
  * @return {promise}
  */
-const getUser = user_id => {
+export const getUser = user_id => {
   return new Promise((resolve, reject) => {
     User.findOne({ _id: user_id }, (error, user) => {
       if (error) {
@@ -38,7 +38,7 @@ const getUser = user_id => {
  * @param  {Object} gitProfile    profile information provided by github
  * @return {promise}              user doc
  */
-const signInViaGithub = gitProfile => {
+export const signInViaGithub = gitProfile => {
   return new Promise((resolve, reject) => {
     // find if user exist on db
     User.findOne({ username: gitProfile.username }, (error, user) => {
@@ -125,7 +125,7 @@ const signInViaGithub = gitProfile => {
  * @param  {String} username
  * @return {Promise}
  */
-const getFullProfile = username => {
+export const getFullProfile = username => {
   return new Promise((resolve, reject) => {
     User.findOne({ username })
       .lean()
@@ -180,7 +180,7 @@ const getFullProfile = username => {
   });
 };
 
-const getGithubToken = code => {
+export const getGithubToken = code => {
   return new Promise((resolve, reject) => {
     axios
       .post("https://github.com/login/oauth/access_token", {
@@ -199,11 +199,4 @@ const getGithubToken = code => {
         reject(error);
       });
   });
-};
-
-module.exports = {
-  signInViaGithub,
-  getUser,
-  getFullProfile,
-  getGithubToken
 };
